@@ -1,0 +1,22 @@
+{
+  "uuid": "e75ca6ae-04c8-4835-ad9f-e0dbec3f1674",
+  "shortName": "Ruler 2.0",
+  "longName": "Ruler 2.0",
+  "companyName": "Dave Smylie + Jnm for 2.0",
+  "versionCode": 2,
+  "versionLabel": "2.0",
+  "watchapp": {
+    "watchface": true
+  },
+  "appKeys": {},
+  "resources": {
+    "media": [
+      {
+        "menuIcon": true,
+        "type": "png",
+        "name": "IMAGE_MENU_ICON",
+        "file": "images/ruler.png"
+      }
+    ]
+  }
+}
