@@ -166,7 +166,10 @@ void rulerLayer_update_callback (Layer *me, GContext* ctx) {
 
 void init_line_layer() {
 	lineLayer = layer_create(layer_get_frame(rootLayer)); // Associate with layer object and set dimensions
-	layer_set_update_proc(lineLayer, lineLayer_update_callback); // Set the drawing callback function for the layer.
+	if (!INVERT_COLORS) {
+		layer_set_update_proc(lineLayer, lineLayer_update_callback);
+	}
+	 // Set the drawing callback function for the layer.
 	layer_add_child(rootLayer, lineLayer); // Add the child to the app's base window
 }
 
