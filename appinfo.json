@@ -4,11 +4,15 @@
   "longName": "Ruler 2.0",
   "companyName": "Dave Smylie + Jnm for 2.0",
   "versionCode": 2,
-  "versionLabel": "2.0",
+  "versionLabel": "2.1",
   "watchapp": {
     "watchface": true
   },
-  "appKeys": {},
+  "capabilities": [ "configurable" ],
+  "appKeys": {
+    "invert":		1010,
+    "vibration":	1011
+  },
   "resources": {
     "media": [
       {
