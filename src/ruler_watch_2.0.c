@@ -6,12 +6,9 @@
 #define LINE_LEVEL 80 // height of marker live.
 #define GRADIENT 4 // distance each 5 min line apart
 
-#define FUDGE      28  // changing the gradient should automatically adjust the scroll offself correctly
+#define FUDGE      21  // changing the gradient should automatically adjust the scroll offset correctly
                        // but it's leaving the screen too far down - move it back up by this much
                        // (I can't see why - the maths here seems pretty straight forward...)
-
-//#define GRADIENT 3 // distance each 5 min line apart
-//#define FUDGE      0
 
 enum {
 	CONFIG_KEY_INVERT		= 1010,
@@ -43,7 +40,7 @@ void set_hour_string(int i, int _hour) {
     _hour = (_hour % 12);
     if (_hour == 0) _hour = 12;
   }
-    
+
   snprintf(hourStrings[i], 12, "%d", _hour);
   text_layer_set_text(hourLayers[i], hourStrings[i]);
 }
@@ -54,11 +51,11 @@ void set_hour_color() {
 		text_layer_set_text_color(hourLayers[i], COLOR_FOREGROUND);
 	}
 }
-	
+
 void init_hours() {
 	static char *x = "x";
 	int i;
-	
+
 	GFont font = fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD);
 	for (i = 0; i < 30; i++) {
 		// 12 gradients per hour, subtract 5 to make the number roughly in the middle of the line
@@ -92,8 +89,8 @@ void lineLayer_update_callback (Layer *me, GContext* ctx) {
 
 void bgLayer_update_callback(Layer *layer, GContext* ctx) {
 	int y = LINE_LEVEL; // position of marker line
-						// when inverting, we don't want the inset color, as otherwise it would be
-						// black (plastic), white (screen), black (screen). Just make it all black
+                      // when inverting, we don't want the inset color, as otherwise it would be
+                      // black (plastic), white (screen), black (screen). Just make it all black
 	if (!invert) {
 		//graphics_fill_rect(ctx, GRect(0,0,144, 168), 0, GCornersAll);
 		graphics_context_set_fill_color(ctx, COLOR_FOREGROUND);
@@ -104,7 +101,7 @@ void bgLayer_update_callback(Layer *layer, GContext* ctx) {
 		graphics_context_set_fill_color(ctx, COLOR_BACKGROUND);
 		graphics_fill_rect(ctx, layer_get_bounds(layer), 0, GCornersAll);
 	}
-	
+
 	// draw the time marker line
 	graphics_context_set_stroke_color(ctx, COLOR_FOREGROUND);
 	graphics_draw_line(ctx, GPoint(0, y), GPoint(144, y));
@@ -115,7 +112,7 @@ void drawRuler(GContext *ctx) {
 	int x = 0;
 	int y = 0;
 	int display_hour;
-	
+
 	graphics_context_set_stroke_color(ctx, COLOR_FOREGROUND);
 	// draw 29 hours worth of lines as we need to be able to have 23.59 get to the top of the screen
 	// whilst still having the next few hours beneath it. (so hours 0-3 are duplicated)
@@ -132,10 +129,10 @@ void drawRuler(GContext *ctx) {
 			} else {
 				x = 30;
 			}
-			
+
 			graphics_draw_line(ctx, GPoint(19, y), GPoint(x, y));
-			
-			
+
+
 			// we are displaying a rolling frame of 29 odd hour markers (to make sure
 			// we have extra numbers at the start and end to facillate rollinng around
 			// as we are displaying this two hours backwards (to make the time marker
@@ -144,7 +141,7 @@ void drawRuler(GContext *ctx) {
 			// it doesn't display as -1 or -2, or 27 o'clock
 			display_hour = (_hour - 2) % 24;
 			if (display_hour < 0) display_hour = display_hour + 24;
-			
+
 			set_hour_string(_hour, display_hour);
 		}
 	}
@@ -153,16 +150,15 @@ void drawRuler(GContext *ctx) {
 
 void rulerLayer_update_callback (Layer *me, GContext* ctx) {
 	int total_mins = ( (hour * 60) + min);
-	int offset = ((total_mins / 5) * GRADIENT * - 1) - FUDGE ;
+	int offset = (total_mins * -GRADIENT / 5) - FUDGE;
 
-	//layer_set_frame(&rulerLayer, GRect(0, offset ,144  ,148));
-	//set the frame to be the area on the screen that we want the 
+	//set the frame to be the area on the screen that we want the
 	//ruler lines  to be visible in (this has clipping off so we wont see
 	//anything outside this box)
-	layer_set_frame(rulerLayer, GRect(5, 5 ,144-20  ,168-10));
-	// offset the bounds of the layer by the length needed to show the current 
+//	layer_set_frame(rulerLayer, GRect(5, 5, 144-20, 168-10));
+	// offset the bounds of the layer by the length needed to show the current
 	// time
-	layer_set_bounds(rulerLayer, GRect(0, offset ,100 ,100));
+	layer_set_bounds(rulerLayer, GRect(0, offset , 100 ,100));
 
 	drawRuler(ctx);
 }
@@ -172,7 +168,7 @@ void init_line_layer() {
 	if (!invert) {
 		layer_set_update_proc(lineLayer, lineLayer_update_callback);
 	}
-	 // Set the drawing callback function for the layer.
+  // Set the drawing callback function for the layer.
 	layer_add_child(rootLayer, lineLayer); // Add the child to the app's base window
 }
 
@@ -197,9 +193,9 @@ void deinit_layers() {
 
 // once a minute update position of the ruler on the screen
 void handle_tick(struct tm *now, TimeUnits units_changed) {
-    hour = now->tm_hour;
-    min = now->tm_min;
-	
+  hour = now->tm_hour;
+  min = now->tm_min;
+
 	if (vibration && min == 0) {
 		vibes_short_pulse();
 	}
@@ -247,13 +243,13 @@ void in_received_handler(DictionaryIterator *received, void *context) {
 
 	Tuple *invertTuple = dict_find(received, CONFIG_KEY_INVERT);
 	Tuple *vibrationTuple = dict_find(received, CONFIG_KEY_VIBRATION);
-	
+
 	if (invertTuple && vibrationTuple) {
 		somethingChanged |= checkAndSaveInt(&invert, invertTuple->value->int32, CONFIG_KEY_INVERT);
 		somethingChanged |= checkAndSaveInt(&vibration, vibrationTuple->value->int32, CONFIG_KEY_VIBRATION);
-		
+
 		logVariables("ReceiveHandler");
-		
+
 		if (somethingChanged) {
 			applyConfig();
 		}
@@ -266,14 +262,14 @@ void readConfig() {
 	} else {
 		invert = 0;
 	}
-	
+
 	if (persist_exists(CONFIG_KEY_VIBRATION)) {
 		vibration = persist_read_int(CONFIG_KEY_VIBRATION);
 	} else {
 		vibration = 0;
 	}
-	
-	logVariables("readConfig");	
+
+	logVariables("readConfig");
 }
 
 static void app_message_init(void) {
@@ -285,7 +281,7 @@ static void app_message_init(void) {
 void handle_init() {
 	time_t t;
 	struct tm *now;
-	
+
 	readConfig();
 	setColors();
 
